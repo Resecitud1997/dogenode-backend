@@ -1,9 +1,12 @@
 name = "dogenode-backend"
-main = "src/index.js"  # <--- IMPORTANTE: Apunta a tu archivo principal del servidor
+main = "src/index.js"
 compatibility_date = "2024-12-05"
 
-# Habilita la compatibilidad con Node.js (CRÍTICO para tu proyecto)
+# ESTO ES CRÍTICO: Bandera de compatibilidad para Express
 compatibility_flags = [ "nodejs_compat" ]
 
-# BORRA o comenta cualquier línea que diga [site] o bucket = "./dist"
-# Si es un backend puro, no necesitas subir 'assets'.
+# SECCIÓN AVANZADA: Ignora los módulos internos de Node.js para el bundler
+[build]
+# Esto le dice a esbuild que no procese módulos nativos, sino que los deje como están
+# para que la bandera nodejs_compat los maneje en tiempo de ejecución.
+external = ["fs", "path", "stream", "crypto", "net", "async_hooks", "buffer", "zlib", "util", "querystring"]
