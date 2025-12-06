@@ -1,0 +1,9 @@
+name = "dogenode-backend"
+main = "src/index.js"  # <--- IMPORTANTE: Apunta a tu archivo principal del servidor
+compatibility_date = "2024-12-05"
+
+# Habilita la compatibilidad con Node.js (CRÍTICO para tu proyecto)
+compatibility_flags = [ "nodejs_compat" ]
+
+# BORRA o comenta cualquier línea que diga [site] o bucket = "./dist"
+# Si es un backend puro, no necesitas subir 'assets'.
