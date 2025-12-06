@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
+"scripts": {
+    "start": "node src/index.js",
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy"
+    // Si no usas TypeScript o un bundler (como esbuild),
+    // NO necesitas un script "build" complejo.
+    // Si Cloudflare te pide un build command, puedes poner: "echo 'No build needed'"
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
