@@ -1,20 +1,12 @@
-// index.js (Adaptado para Cloudflare Workers)
+// index.js (Versión compatible con Cloudflare Workers)
 
-// 1. ELIMINAR dependencia de Node.js (dotenv)
-// En Cloudflare Workers, las variables se inyectan globalmente (como env.VARIABLE).
-// require('dotenv').config(); // <-- ELIMINADO
-
-// 2. Importaciones necesarias (Express, CORS, RateLimit y el ADAPTADOR)
+// 1. ELIMINAR dependencias incompatibles: helmet, morgan.
 const express = require('express');
 const cors = require('cors');
-// Middleware de seguridad y logging (Helmet, Morgan, etc.)
-// Nota: helmet y morgan no son 100% compatibles o son innecesarios en Workers. 
-// Usaremos opciones más ligeras o las eliminaremos.
 const rateLimit = require('express-rate-limit');
-const { handle } = require('@hono/node-server/cloudflare'); // Importa el manejador CRÍTICO
+const { handle } = require('@hono/node-server/cloudflare'); // Adaptador esencial
 
-// 3. Importar rutas
-// Asegúrate de que las rutas estén en el formato de módulo correcto (require o import ES)
+// 2. Importar rutas (Asegúrate de que estas rutas no usen 'fs' o 'crypto' internamente)
 const balanceRoutes = require('./routes/balance');
 const earningsRoutes = require('./routes/earnings');
 const withdrawRoutes = require('./routes/withdraw');
@@ -22,35 +14,21 @@ const transactionsRoutes = require('./routes/transactions');
 const healthRoutes = require('./routes/health');
 
 const app = express();
-// Cloudflare Workers ignora el puerto; lo gestiona el Edge.
-// const PORT = process.env.PORT || 3000; // <-- ELIMINADO
+// Se elimina la definición de PORT.
 
 // ========================
-// MIDDLEWARES ALIGERADOS
+// MIDDLEWARES DE SEGURIDAD Y AJUSTES
 // ========================
-express.urlencoded
-app.use(cors({ /* ... */ }));
 
-// Rate limiting (se mantiene, funciona con nodejs_compat)
-const limiter = rateLimit({ /* ... */ });
-app.use('/api/', limiter);
+// app.use(helmet()); // <--- ELIMINADO para solucionar el error de módulos nativos
 
-// Body parser - SOLO JSON
-app.use(express.json());
+// CORS
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || '*', 
+    credentials: true
+}));
 
-// ... (RUTAS) ...
-
-// ===================================
-// EXPORTACIÓN FINAL (Adaptador)
-// ===================================
-
-module.exports = {
-    fetch: handle(app),
-};
-
-// Rate limiting
-// Rate limiting de Express funcionará, pero Cloudflare ofrece Rate Limiting a nivel de Edge, 
-// que es más eficiente. Se mantiene el de Express como capa interna.
+// Rate limiting (Debe funcionar con nodejs_compat)
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: parseInt(process.env.RATE_LIMIT_MAX) || 100,
@@ -61,14 +39,11 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Body parser
-// Express.urlencoded puede fallar sin un módulo compatible con Workers; lo mantenemos simple.
+// Body parser - SOLO JSON
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true })); // <-- Eliminado/Comentado por posible incompatibilidad
+// app.use(express.urlencoded({ extended: true })); // <--- ELIMINADO: Causa error de 'querystring'/'util'
 
-// Logger (Morgan): Morgan es muy dependiente de Node.js. 
-// Cloudflare Workers ya tiene logging de peticiones; se elimina.
-// app.use(morgan('combined')); // <-- ELIMINADO
+// app.use(morgan('combined')); // <--- ELIMINADO para solucionar el error de 'stream'/'tty'
 
 // ========================
 // RUTAS
@@ -76,13 +51,15 @@ app.use(express.json());
 
 // Página principal
 app.get('/', (req, res) => {
-    // ... (Tu objeto de respuesta de bienvenida)
     res.json({
         success: true,
         message: 'DogeNode Backend API',
         version: '2.0.0',
         status: 'Tu servidor está funcionando correctamente',
-        // ...
+        endpoints: {
+            // ... (Tus endpoints)
+        },
+        documentation: 'https://dogenode.com/docs'
     });
 });
 
@@ -94,7 +71,7 @@ app.use('/api/withdraw', withdrawRoutes);
 app.use('/api/transactions', transactionsRoutes);
 
 // ========================
-// ERROR HANDLERS (Funcionan bien con Express)
+// ERROR HANDLERS (Permanecen sin cambios)
 // ========================
 
 app.use((req, res) => {
@@ -106,7 +83,6 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-    // console.error() funciona en Cloudflare, enviando el log a la consola del Worker
     console.error('Error:', err);
     res.status(err.status || 500).json({
         success: false,
@@ -116,15 +92,9 @@ app.use((err, req, res, next) => {
 });
 
 // ===================================
-// INICIAR SERVIDOR: EL CAMBIO CRÍTICO
+// EXPORTACIÓN DE WORKER
 // ===================================
 
-// 1. Eliminar app.listen() y manejo de errores de proceso de Node.js.
-// app.listen(PORT, ...) // <-- ELIMINADO
-// process.on('unhandledRejection', ...) // <-- ELIMINADO
-
-// 2. Exportar el manejador fetch que requiere Cloudflare Workers.
-// Esto envuelve toda tu aplicación Express para que se ejecute en el entorno V8.
 module.exports = {
-    fetch: handle(app),
+    fetch: handle(app), // Envuelve Express para Cloudflare
 };
