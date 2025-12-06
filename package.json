@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
+  "scripts": {
     "start": "node src/index.js",
     "dev": "npx wrangler dev",
-    "deploy": "npx wrangler deploy"
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "npx wrangler deploy",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
