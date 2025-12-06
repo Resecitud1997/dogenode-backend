@@ -28,8 +28,7 @@ const app = express();
 // ========================
 // MIDDLEWARES ALIGERADOS
 // ========================
-
-// app.use(helmet()); // <--- ELIMINAR/COMENTAR
+express.urlencoded
 app.use(cors({ /* ... */ }));
 
 // Rate limiting (se mantiene, funciona con nodejs_compat)
@@ -38,9 +37,6 @@ app.use('/api/', limiter);
 
 // Body parser - SOLO JSON
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true })); // <--- COMENTAR/ELIMINAR
-
-// app.use(morgan('combined')); // <--- ELIMINAR/COMENTAR
 
 // ... (RUTAS) ...
 
