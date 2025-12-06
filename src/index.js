@@ -1,42 +1,29 @@
-// src/index.js (Hono: Código Nativo de Cloudflare Worker)
+// src/index.js (Hono: Código Nativo de Cloudflare Worker y ES Module)
 
-// 1. Importaciones de Hono y Módulos
 import { Hono } from 'hono';
-import { cors } from 'hono/cors'; // Middleware CORS de Hono
-import { rateLimiter } from 'hono-rate-limiter'; // Middleware Rate Limit
-// Si tus rutas usan el formato module.exports = router, tendrás que reescribirlas.
-// Asumo que ahora usarás un patrón de rutas modular más compatible.
+import { cors } from 'hono/cors'; 
+import { json } from 'hono/json';
+import { rateLimiter } from 'hono-rate-limiter'; // Librería más estable que la anterior
 
-// 2. Aplicación y Configuración
+// Nota: Necesitas convertir tus archivos de rutas (balance, earnings, etc.) 
+// a la sintaxis de Hono o importarlos con import.
+
 const app = new Hono();
 
 // ========================
-// MIDDLEWARES DE SEGURIDAD (Hono)
+// MIDDLEWARES (Hono)
 // ========================
 
-// CORS (nativo de Hono)
-app.use('*', cors({
-    origin: process.env.CORS_ORIGIN || '*', 
+// CORS
+app.use(cors({
+    origin: (origin) => (origin === process.env.CORS_ORIGIN || origin === 'null' ? origin : '*'),
     credentials: true,
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['POST', 'GET', 'OPTIONS'],
 }));
 
-// Rate limiting (Usando la librería de Hono, ahora instalada)
-const limiter = rateLimiter({
-    windowMs: 15 * 60 * 1000,
-    limit: parseInt(process.env.RATE_LIMIT_MAX) || 100,
-    standardHeaders: true,
-    keyGenerator: (c) => c.env.IP || 'global',
-    message: { success: false, error: 'Demasiadas peticiones, intenta más tarde' }
-});
-app.use(limiter);
-
-// Body parser
-app.use('*', async (c, next) => {
-    // Hono ya maneja el parseo de JSON, no se necesita body-parser
-    await next();
-});
+// Body parser (Hono lo maneja por defecto, pero usamos este middleware para asegurar JSON)
+app.use(json());
 
 // ========================
 // RUTAS PRINCIPALES (Hono)
@@ -49,38 +36,32 @@ app.get('/', (c) => {
         message: 'DogeNode Backend API (Hono Native)',
         version: '2.0.0',
         status: 'Servidor corriendo en Cloudflare Workers',
-        // ... (resto de metadata)
     });
 });
 
-// Nota: Para usar tus archivos de ruta existentes, deberás reescribirlos a la sintaxis de Hono.
-// Por ahora, para el despliegue, comentamos la importación de rutas.
-// app.route('/api/health', healthRoutes); 
-// app.route('/api/balance', balanceRoutes); 
-// ...
+// Nota: Las rutas deben ser reescritas a Hono:
+// app.route('/api/health', healthRouter); 
 
 // ========================
 // ERROR HANDLERS (Hono)
 // ========================
 
-// 404 Handler de Hono
 app.notFound((c) => {
+  // Manejo de 404
   return c.json({ success: false, error: 'Endpoint no encontrado', path: c.req.url }, 404);
 });
 
-// Error Handler Global de Hono
 app.onError((err, c) => {
+  // Manejo de errores globales
   console.error('Error:', err);
   return c.json({ 
     success: false, 
     error: err.message || 'Error interno del servidor',
-    ...(c.env.NODE_ENV === 'development' && { stack: err.stack })
   }, 500);
 });
 
 // ===================================
-// EXPORTACIÓN DE WORKER (Hono)
+// EXPORTACIÓN DE WORKER (Formato ES Module)
 // ===================================
 
-// Hono se exporta directamente como el manejador fetch.
-export default app;
+export default app; // Soluciona el error de "no default export"
