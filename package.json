@@ -2,9 +2,9 @@
   "name": "dogenode-backend",
   "version": "1.0.0",
   "description": "DogeNode Backend API",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "npx wrangler dev",
     "dev": "npx wrangler dev",
     "deploy": "npx wrangler deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,9 +14,9 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "hono": "^4.0.0",
-    "hono-rate-limiter": "^1.2.0",
-    "itty-router": "^4.0.0",
-    "toucan-js": "^2.6.0"
+    "hono": "^4.2.3",
+    "@hono/node-server": "^1.11.0",
+    "@hono/zod-validator": "^0.2.2",
+    "zod": "^3.23.6"
   }
 }
