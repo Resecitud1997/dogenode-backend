@@ -1,65 +1,86 @@
-// index.js (Reescrito a Hono, nativo de Workers)
+// src/index.js (Hono: Código Nativo de Cloudflare Worker)
 
-// 1. ELIMINAR require('express') y el adapter de hono/node-server
-const { Hono } = require('hono');
-const { cors } = require('hono/cors'); // Middleware CORS de Hono
+// 1. Importaciones de Hono y Módulos
+import { Hono } from 'hono';
+import { cors } from 'hono/cors'; // Middleware CORS de Hono
+import { rateLimiter } from 'hono-rate-limiter'; // Middleware Rate Limit
+// Si tus rutas usan el formato module.exports = router, tendrás que reescribirlas.
+// Asumo que ahora usarás un patrón de rutas modular más compatible.
 
-// ... (Importaciones de rutas: Asumimos que tus rutas usan Express Router)
-
+// 2. Aplicación y Configuración
 const app = new Hono();
 
 // ========================
-// MIDDLEWARES DE Hono
+// MIDDLEWARES DE SEGURIDAD (Hono)
 // ========================
 
 // CORS (nativo de Hono)
 app.use('*', cors({
-    origin: (origin, c) => {
-        if (origin === process.env.CORS_ORIGIN || origin === 'null') {
-            return origin;
-        }
-        return c.env.CORS_ORIGIN || '*'; // Usa variables de entorno de Cloudflare
-    },
-    allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
-    allowMethods: ['POST', 'GET', 'OPTIONS'],
-    exposeHeaders: ['Content-Length'],
-    maxAge: 600,
+    origin: process.env.CORS_ORIGIN || '*', 
     credentials: true,
+    allowHeaders: ['Content-Type', 'Authorization'],
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
 }));
 
-// Rate limiting (nativo de Hono)
+// Rate limiting (Usando la librería de Hono, ahora instalada)
 const limiter = rateLimiter({
     windowMs: 15 * 60 * 1000,
     limit: parseInt(process.env.RATE_LIMIT_MAX) || 100,
     standardHeaders: true,
     keyGenerator: (c) => c.env.IP || 'global',
+    message: { success: false, error: 'Demasiadas peticiones, intenta más tarde' }
+});
+app.use(limiter);
+
+// Body parser
+app.use('*', async (c, next) => {
+    // Hono ya maneja el parseo de JSON, no se necesita body-parser
+    await next();
 });
 
-// app.use(limiter); // Aplicamos el limiter
-
 // ========================
-// RUTAS PRINCIPALES (Reemplaza app.get por app.get)
+// RUTAS PRINCIPALES (Hono)
 // ========================
 
 // Página principal
 app.get('/', (c) => {
     return c.json({
         success: true,
-        message: 'DogeNode Backend API (Hono)',
-        // ... (resto de tu metadata)
+        message: 'DogeNode Backend API (Hono Native)',
+        version: '2.0.0',
+        status: 'Servidor corriendo en Cloudflare Workers',
+        // ... (resto de metadata)
     });
 });
 
-// APLICAR ROUTERS DE EXPRESS: Esto es lo complicado. 
-// Debes reescribir tus routers de Express a Routers de Hono
-// o usar un adaptador de Express a Hono (pero eso nos devuelve al problema original).
-// La forma profesional es reescribir tus rutas a la sintaxis de Hono.
+// Nota: Para usar tus archivos de ruta existentes, deberás reescribirlos a la sintaxis de Hono.
+// Por ahora, para el despliegue, comentamos la importación de rutas.
+// app.route('/api/health', healthRoutes); 
+// app.route('/api/balance', balanceRoutes); 
+// ...
 
-// EJEMPLO DE ROUTER Hono:
-// app.route('/api/health', healthRoutes); // Si healthRoutes es un Hono Router
+// ========================
+// ERROR HANDLERS (Hono)
+// ========================
+
+// 404 Handler de Hono
+app.notFound((c) => {
+  return c.json({ success: false, error: 'Endpoint no encontrado', path: c.req.url }, 404);
+});
+
+// Error Handler Global de Hono
+app.onError((err, c) => {
+  console.error('Error:', err);
+  return c.json({ 
+    success: false, 
+    error: err.message || 'Error interno del servidor',
+    ...(c.env.NODE_ENV === 'development' && { stack: err.stack })
+  }, 500);
+});
 
 // ===================================
-// EXPORTACIÓN DE WORKER (Sintaxis nativa)
+// EXPORTACIÓN DE WORKER (Hono)
 // ===================================
 
-export default app; // Hono se exporta directamente.
+// Hono se exporta directamente como el manejador fetch.
+export default app;
