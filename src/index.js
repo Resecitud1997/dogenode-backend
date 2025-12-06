@@ -3,7 +3,6 @@
 // 1. ELIMINAR require('express') y el adapter de hono/node-server
 const { Hono } = require('hono');
 const { cors } = require('hono/cors'); // Middleware CORS de Hono
-const { rateLimiter } = require('hono-rate-limiter'); // Un Rate Limiter ligero
 
 // ... (Importaciones de rutas: Asumimos que tus rutas usan Express Router)
 
