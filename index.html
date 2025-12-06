@@ -597,3 +597,306 @@
                     <div class="flex gap-3">
                         <input type="text" id="referralLink" readonly class="flex-1 px-4 py-3 rounded-lg bg-white bg-opacity-30 text-white font-mono text-sm" value="">
                         <button onclick="copyReferralLink()" class="px-6 py-3 bg-white text-orange-500 rounded-lg font
+-bold hover:bg-opacity-90 transition">
+<i class="fas fa-copy mr-2"></i>
+Copiar
+</button>
+</div>
+<div class="grid grid-cols-3 gap-4 mt-6">
+<div class="text-center">
+<p class="text-3xl font-bold" id="referralCount">0</p>
+<p class="text-sm opacity-80">Referidos</p>
+</div>
+<div class="text-center">
+<p class="text-3xl font-bold" id="referralEarnings">0.00</p>
+<p class="text-sm opacity-80">DOGE Ganados</p>
+</div>
+<div class="text-center">
+<p class="text-3xl font-bold">10%</p>
+<p class="text-sm opacity-80">Comisión</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+    <!-- Footer -->
+    <footer class="bg-white mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-3xl">🐕</span>
+                        <span class="text-xl font-bold text-gray-800">DogeNode</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">
+                        Gana Dogecoin real compartiendo tu ancho de banda. Pagos procesados en blockchain.
+                    </p>
+                    <div class="mt-4">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                            <i class="fas fa-shield-check mr-1"></i>
+                            Pagos Verificados en Blockchain
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800 mb-4">Enlaces</h4>
+                    <ul class="space-y-2 text-gray-600 text-sm">
+                        <li><a href="#" class="hover:text-orange-500">Inicio</a></li>
+                        <li><a href="#" class="hover:text-orange-500">Cómo Funciona</a></li>
+                        <li><a href="#" class="hover:text-orange-500">Preguntas Frecuentes</a></li>
+                        <li><a href="#" class="hover:text-orange-500">Soporte</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800 mb-4">Legal</h4>
+                    <ul class="space-y-2 text-gray-600 text-sm">
+                        <li><a href="#" class="hover:text-orange-500">Términos de Servicio</a></li>
+                        <li><a href="#" class="hover:text-orange-500">Política de Privacidad</a></li>
+                        <li><a href="#" class="hover:text-orange-500">Cookies</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800 mb-4">Comunidad</h4>
+                    <div class="flex gap-3">
+                        <a href="#" class="w-10 h-10 bg-gray-200 hover:bg-blue-500 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-twitter text-gray-600 hover:text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-200 hover:bg-purple-500 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-discord text-gray-600 hover:text-white"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-200 hover:bg-red-500 rounded-full flex items-center justify-center transition">
+                            <i class="fab fa-reddit text-gray-600 hover:text-white"></i>
+                        </a>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-xs text-gray-500">Verificar transacciones:</p>
+                        <a href="https://dogechain.info" target="_blank" class="text-blue-500 hover:text-blue-600 text-xs">
+                            <i class="fas fa-external-link-alt mr-1"></i>
+                            Dogechain.info
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 mt-8 pt-8 text-center text-gray-600 text-sm">
+                <p>&copy; 2024 DogeNode. Todos los derechos reservados.</p>
+                <p class="mt-2" id="extensionStatusFooter">
+                    <i class="fas fa-circle text-gray-400 mr-2"></i>
+                    Extensión: No detectada
+                </p>
+                <p class="mt-2" id="backendStatusFooter">
+                    <i class="fas fa-server text-gray-400 mr-2"></i>
+                    Backend: Verificando...
+                </p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- Withdraw Modal -->
+<div id="withdrawModal" class="modal">
+    <div class="modal-content">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-arrow-up text-purple-500 mr-3"></i>
+                Retirar DOGE Real
+            </h3>
+            <button onclick="closeWithdrawModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+            <p class="text-sm text-green-800">
+                <i class="fas fa-shield-check mr-2"></i>
+                <strong>Pago Real:</strong> Tu retiro será procesado en la blockchain de Dogecoin
+            </p>
+        </div>
+
+        <form onsubmit="processWithdraw(event)">
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">
+                    Dirección de Destino (Dogecoin)
+                </label>
+                <input type="text" id="withdrawAddress" placeholder="D8r5F3m..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                <p class="text-gray-500 text-sm mt-2">Ingresa tu dirección de Dogecoin que empiece con "D"</p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">
+                    Cantidad (DOGE)
+                </label>
+                <input type="number" id="withdrawAmount" placeholder="0.00" step="0.01" min="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                <div class="flex justify-between text-sm mt-2">
+                    <span class="text-gray-500">Mínimo: 10 DOGE</span>
+                    <span class="text-gray-700 font-semibold">Disponible: <span id="modalAvailable">0.00</span> DOGE</span>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6 rounded">
+                <p class="text-sm text-yellow-800">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Fee de red: ~1 DOGE | Tiempo de procesamiento: 5-15 minutos
+                </p>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="button" onclick="closeWithdrawModal()" class="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition">
+                    Cancelar
+                </button>
+                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-bold transition">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Retirar DOGE Real
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Referral Modal -->
+<div id="referralModal" class="modal">
+    <div class="modal-content">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-share-alt text-blue-500 mr-3"></i>
+                Invitar Amigos
+            </h3>
+            <button onclick="closeReferralModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+
+        <div class="text-center mb-6">
+            <div class="inline-block p-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mb-4">
+                <i class="fas fa-gift text-white text-4xl"></i>
+            </div>
+            <h4 class="text-2xl font-bold text-gray-800 mb-2">Gana 10% Extra</h4>
+            <p class="text-gray-600">Por cada amigo que invites y gane DOGE real, tú recibes 10% extra</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-6 mb-6">
+            <p class="text-sm text-gray-600 mb-3 font-semibold">Tu enlace de referido:</p>
+            <div class="flex gap-2">
+                <input type="text" id="modalReferralLink" readonly class="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-lg font-mono text-sm" value="">
+                <button onclick="copyModalReferralLink()" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-bold transition">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <button onclick="shareTwitter()" class="p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+                <i class="fab fa-twitter text-2xl mb-2"></i>
+                <p class="text-sm">Twitter</p>
+            </button>
+            <button onclick="shareFacebook()" class="p-4 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition">
+                <i class="fab fa-facebook text-2xl mb-2"></i>
+                <p class="text-sm">Facebook</p>
+            </button>
+            <button onclick="shareWhatsApp()" class="p-4 bg-green-500 hover:bg-green-600 text-white rounded-lg transition">
+                <i class="fab fa-whatsapp text-2xl mb-2"></i>
+                <p class="text-sm">WhatsApp</p>
+            </button>
+        </div>
+
+        <button onclick="closeReferralModal()" class="w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold transition">
+            Cerrar
+        </button>
+    </div>
+</div>
+
+<!-- Notification Toast -->
+<div id="toast" class="toast">
+    <div class="flex items-center gap-3">
+        <i id="toastIcon" class="fas fa-check-circle text-2xl"></i>
+        <div>
+            <p id="toastTitle" class="font-bold"></p>
+            <p id="toastMessage" class="text-sm"></p>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/app.js"></script>
+
+<!-- Backend Status Check -->
+<script>
+    // Actualizar estado del backend
+    async function updateBackendStatus() {
+        try {
+            const response = await api.healthCheck();
+            const statusBadge = document.getElementById('backendStatus');
+            const statusText = document.getElementById('backendStatusText');
+            const footerStatus = document.getElementById('backendStatusFooter');
+            
+            if (response.success) {
+                statusBadge.classList.remove('disconnected');
+                statusBadge.classList.add('connected');
+                statusText.textContent = 'Backend Conectado';
+                
+                if (footerStatus) {
+                    footerStatus.innerHTML = '<i class="fas fa-server text-green-500 mr-2"></i>Backend: Conectado';
+                }
+                
+                // Actualizar estados de métodos de pago
+                const services = response.services;
+                if (services) {
+                    const dogeNode = document.getElementById('dogeNodeStatus');
+                    const dogechain = document.getElementById('dogechainStatus');
+                    const wdoge = document.getElementById('wdogeStatus');
+                    
+                    if (dogeNode) {
+                        dogeNode.textContent = services.dogecoinNode ? 'Disponible' : 'No disponible';
+                        dogeNode.className = services.dogecoinNode ? 
+                            'px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold' :
+                            'px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold';
+                    }
+                    
+                    if (dogechain) {
+                        dogechain.textContent = services.dogechainAPI ? 'Disponible' : 'No disponible';
+                        dogechain.className = services.dogechainAPI ? 
+                            'px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold' :
+                            'px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold';
+                    }
+                    
+                    if (wdoge) {
+                        wdoge.textContent = services.wrappedDoge ? 'Disponible' : 'No disponible';
+                        wdoge.className = services.wrappedDoge ? 
+                            'px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold' :
+                            'px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold';
+                    }
+                }
+            } else {
+                throw new Error('Backend no disponible');
+            }
+        } catch (error) {
+            const statusBadge = document.getElementById('backendStatus');
+            const statusText = document.getElementById('backendStatusText');
+            const footerStatus = document.getElementById('backendStatusFooter');
+            
+            statusBadge.classList.remove('connected');
+            statusBadge.classList.add('disconnected');
+            statusText.textContent = 'Backend Desconectado';
+            
+            if (footerStatus) {
+                footerStatus.innerHTML = '<i class="fas fa-server text-red-500 mr-2"></i>Backend: Desconectado (Modo Offline)';
+            }
+            
+            console.warn('Backend no disponible:', error);
+        }
+    }
+
+    // Verificar backend al cargar
+    setTimeout(updateBackendStatus, 2000);
+    
+    // Verificar cada 30 segundos
+    setInterval(updateBackendStatus, 30000);
+</script>
+</body>
+</html>
+````
