@@ -1,7 +1,7 @@
 {
   "name": "dogenode-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "DogeNode Backend API",
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
@@ -12,11 +12,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
-    "body-parser": "^2.2.1",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "node-fetch": "^3.3.2"
+    "hono": "^4.0.0",
+    "hono-rate-limiter": "^1.2.0",
+    "itty-router": "^4.0.0",
+    "toucan-js": "^2.6.0"
   }
 }
