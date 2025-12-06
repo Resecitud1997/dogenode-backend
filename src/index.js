@@ -26,18 +26,31 @@ const app = express();
 // const PORT = process.env.PORT || 3000; // <-- ELIMINADO
 
 // ========================
-// MIDDLEWARES DE SEGURIDAD Y AJUSTES
+// MIDDLEWARES ALIGERADOS
 // ========================
 
-// Helmet (Workers ya maneja algunos headers de seguridad, pero se puede usar)
-// Se mantiene: app.use(helmet()); 
+// app.use(helmet()); // <--- ELIMINAR/COMENTAR
+app.use(cors({ /* ... */ }));
 
-// CORS
-// Usamos el objeto global env para acceder a las variables de entorno de Cloudflare
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*', 
-    credentials: true
-}));
+// Rate limiting (se mantiene, funciona con nodejs_compat)
+const limiter = rateLimit({ /* ... */ });
+app.use('/api/', limiter);
+
+// Body parser - SOLO JSON
+app.use(express.json());
+// app.use(express.urlencoded({ extended: true })); // <--- COMENTAR/ELIMINAR
+
+// app.use(morgan('combined')); // <--- ELIMINAR/COMENTAR
+
+// ... (RUTAS) ...
+
+// ===================================
+// EXPORTACIÓN FINAL (Adaptador)
+// ===================================
+
+module.exports = {
+    fetch: handle(app),
+};
 
 // Rate limiting
 // Rate limiting de Express funcionará, pero Cloudflare ofrece Rate Limiting a nivel de Edge, 
