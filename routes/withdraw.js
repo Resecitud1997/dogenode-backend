@@ -246,3 +246,140 @@ router.get('/status/:transactionId', async (req, res) => {
                 } else if (transaction.method === 'wrapped_doge' && wrappedDoge.isAvailable()) {
                     const txInfo = await wrappedDoge.getTransaction(transaction.blockchain.txHash);
                     confirmations = txInfo.confirmations;
+                    }
+            
+            await transaction.updateConfirmations(confirmations);
+        } catch (error) {
+            console.error('Error actualizando confirmaciones:', error);
+        }
+    }
+    
+    res.json({
+        success: true,
+        data: {
+            transactionId: transaction.txId,
+            status: transaction.status,
+            amount: transaction.amount,
+            fee: transaction.fee,
+            toAddress: transaction.toAddress,
+            txHash: transaction.blockchain.txHash,
+            confirmations: transaction.blockchain.confirmations,
+            explorerUrl: transaction.blockchain.explorerUrl,
+            createdAt: transaction.createdAt,
+            completedAt: transaction.completedAt,
+            error: transaction.error
+        }
+    });
+    
+} catch (error) {
+    console.error('Error obteniendo estado:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Error al obtener estado de la transacción'
+    });
+}
+});
+// POST /api/withdraw/retry/:transactionId
+router.post('/retry/:transactionId', async (req, res) => {
+try {
+const { transactionId } = req.params;
+    const transaction = await Transaction.findOne({ txId: transactionId });
+    
+    if (!transaction) {
+        return res.status(404).json({
+            success: false,
+            error: 'Transacción no encontrada'
+        });
+    }
+    
+    if (transaction.status !== 'failed') {
+        return res.status(400).json({
+            success: false,
+            error: 'Solo se pueden reintentar transacciones fallidas'
+        });
+    }
+    
+    if (transaction.retries >= 3) {
+        return res.status(400).json({
+            success: false,
+            error: 'Máximo de reintentos alcanzado'
+        });
+    }
+    
+    // Reintentar
+    await transaction.retry();
+    
+    // Procesar en background
+    processWithdrawal(transaction._id).catch(error => {
+        console.error('Error en reintento:', error);
+    });
+    
+    res.json({
+        success: true,
+        message: 'Reintento de transacción iniciado',
+        data: {
+            transactionId: transaction.txId,
+            retries: transaction.retries
+        }
+    });
+    
+} catch (error) {
+    console.error('Error reintentando transacción:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Error al reintentar la transacción'
+    });
+}
+    });
+// GET /api/withdraw/estimate
+router.get('/estimate', async (req, res) => {
+try {
+const { amount, method = 'dogecoin_node' } = req.query;
+    if (!amount || amount <= 0) {
+        return res.status(400).json({
+            success: false,
+            error: 'Cantidad inválida'
+        });
+    }
+    
+    const parsedAmount = parseFloat(amount);
+    
+    // Calcular fee
+    const fee = config.withdrawal.feeFixed + (parsedAmount * config.withdrawal.feePercent);
+    const totalAmount = parsedAmount + fee;
+    
+    // Estimar fee de red
+    let networkFee = 1.0;
+    
+    try {
+        if (method === 'dogecoin_node' && dogecoinNode.isAvailable()) {
+            networkFee = await dogecoinNode.estimateFee();
+        } else if (method === 'dogechain_api' && dogechainAPI.isAvailable()) {
+            networkFee = await dogechainAPI.estimateFee();
+        }
+    } catch (error) {
+        console.error('Error estimando fee de red:', error);
+    }
+    
+    res.json({
+        success: true,
+        data: {
+            amount: parsedAmount,
+            fee: fee,
+            networkFee: networkFee,
+            totalAmount: totalAmount,
+            youWillReceive: parsedAmount,
+            estimatedTime: '5-15 minutos'
+        }
+    });
+    
+} catch (error) {
+    console.error('Error estimando retiro:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Error al estimar retiro'
+    });
+}
+    });
+module.exports = router;
+
