@@ -2,9 +2,6 @@ name = "dogenode-backend"
 main = "src/index.js"
 compatibility_date = "2024-12-05"
 
-# ESTO ES CRÍTICO: Bandera de compatibilidad para Express
-compatibility_flags = [ "nodejs_compat" ]
-
 # SECCIÓN AVANZADA: Ignora los módulos internos de Node.js para el bundler
 [build]
 # Esto le dice a esbuild que no procese módulos nativos, sino que los deje como están
